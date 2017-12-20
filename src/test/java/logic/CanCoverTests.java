@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 public class CanCoverTests {
@@ -30,7 +31,7 @@ public class CanCoverTests {
         };
 
         Set<FD> outFDs = getFds(result);
-        DBStructure str = new DBStructure(getFds(arr));
+        Structure str = new Structure(getFds(arr));
 
         assertTrue(str.canonicalCover().equals(outFDs));
 
@@ -49,7 +50,8 @@ public class CanCoverTests {
                 {{"B"}, {"C"}}
         };
         String[][][] result = {
-                {{"B"}, {"C","E"}},
+                {{"B"}, {"C"}},
+                {{"B"}, {"E"}},
                 {{"C","F"}, {"D"}},
                 {{"C"},{"A"}},
                 {{"C","E"}, {"F"}},
@@ -57,9 +59,9 @@ public class CanCoverTests {
         };
 
         Set<FD> outFDs = getFds(result);
-        DBStructure str = new DBStructure(getFds(arr));
+        Structure str = new Structure(getFds(arr));
 
-        assertTrue(str.canonicalCover().equals(outFDs));
+        assertEquals(outFDs, str.canonicalCover());
 
     }
 
@@ -74,7 +76,7 @@ public class CanCoverTests {
         };
 
         Set<FD> outFDs = getFds(result);
-        DBStructure str = new DBStructure(getFds(arr));
+        Structure str = new Structure(getFds(arr));
 
         assertTrue(str.canonicalCover().equals(outFDs));
 
@@ -92,7 +94,7 @@ public class CanCoverTests {
         };
 
         Set<FD> outFDs = getFds(result);
-        DBStructure str = new DBStructure(getFds(arr));
+        Structure str = new Structure(getFds(arr));
 
         assertTrue(str.canonicalCover().equals(outFDs));
 
@@ -109,14 +111,15 @@ public class CanCoverTests {
         };
         String[][][] result = {
                 {{"A"},{"D"}},
-                {{"C"}, {"B","A"}},
+                {{"C"}, {"B"}},
+                {{"C"}, {"A"}},
                 {{"E"},{"A"}}
         };
 
         Set<FD> outFDs = getFds(result);
-        DBStructure str = new DBStructure(getFds(arr));
+        Structure str = new Structure(getFds(arr));
 
-        assertTrue(str.canonicalCover().equals(outFDs));
+        assertEquals(outFDs, str.canonicalCover());
 
     }
 }

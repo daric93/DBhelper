@@ -3,7 +3,7 @@ package logic;
 
 import org.junit.Test;
 
-public class DBStructureTest {
+public class StructureTest {
     @Test
     public void createStructure() {
     }
