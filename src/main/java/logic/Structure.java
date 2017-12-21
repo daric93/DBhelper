@@ -1,8 +1,10 @@
 package logic;
 
-import org.apache.commons.lang3.ArrayUtils;
+import com.google.common.collect.Sets;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Structure {
@@ -49,17 +51,30 @@ public class Structure {
         return removeExtrRHS(fdSet);
     }
 
+    static Set<String> attributeClosure(Set<String> attrs, Set<FD> fds) {
+        Set<String> attrClosure = new HashSet<>(attrs);
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            for (FD fd : fds)
+                if (attrClosure.containsAll(fd.getLhs())) {
+                    changed = attrs.addAll(fd.getRhs());
+                }
+        }
+        return attrClosure;
+    }
+
     static Set<FD> removeExtrLHS(Set<FD> funcDependencies) {
         Set<FD> fds = new HashSet<>();
         funcDependencies.forEach(fd -> {
-                List<String[]> powerSet = getPowerSet(fd.getLhs());
-                for (String[] attr : powerSet) {
-                    List<String> attributeClosure = attributeClosure(attr, funcDependencies);
-                    if (attributeClosure.containsAll(fd.getRhs())) {
-                        fds.add(new FD(Arrays.asList(attr), fd.getRhs()));
-                        break;
-                    }
+            Set<Set<String>> powerSet = Sets.powerSet(fd.getLhs());
+            for (Set<String> sub : powerSet) {
+                Set<String> attributeClosure = attributeClosure(sub, funcDependencies);
+                if (attributeClosure.containsAll(fd.getRhs())) {
+                    fds.add(new FD(sub, fd.getRhs()));
+                    break;
                 }
+            }
         });
         return fds;
     }
@@ -67,8 +82,8 @@ public class Structure {
     static Set<FD> removeExtrRHS(Set<FD> funcDependencies) {
         return funcDependencies.stream()
                 .filter(fd -> {
-                    List<String> attrClsr = attributeClosure(fd.getLhs().toArray(new String[0]), removeFD(funcDependencies, fd));
-                    return !attrClsr.containsAll(fd.getRhs());
+                    Set<String> closure = attributeClosure(fd.getLhs(), removeFD(funcDependencies, fd));
+                    return !closure.containsAll(fd.getRhs());
                 })
                 .collect(Collectors.toSet());
     }
@@ -77,43 +92,42 @@ public class Structure {
         Set<FD> fds = new HashSet<>();
         for (FD fd : funcDependencies)
             for (String attr : fd.getRhs())
-                fds.add(new FD(fd.getLhs(), Arrays.asList(attr)));
+                fds.add(new FD(fd.getLhs(), Sets.newHashSet(attr)));
         return fds;
     }
 
-    static List<String[]> getPowerSet(List<String> attr) {
-        List<String[]> sets = new ArrayList<>();
-        if (attr.isEmpty())
-            return Collections.emptyList();
-        String currAttr = attr.get(0);
-        sets.add(new String[]{currAttr});
-        List<String[]> powerSet = getPowerSet(attr.subList(1, attr.size()));
-        for (String[] subs : powerSet) {
-            sets.add(subs);
-            String[] set = ArrayUtils.add(subs, currAttr);
-                sets.add(set);
-        }
-        return sets;
+    static Set<FD> removeFD(Set<FD> fds, FD fd) {
+        return Sets.filter(fds, f -> !Objects.equals(f, fd));
     }
 
-    static List<String> attributeClosure(String[] attr, Set<FD> funcDependencies) {
-        List<String> attrs = new ArrayList<>();
-        attrs.addAll(Arrays.asList(attr));
-        boolean changed = true;
-        while (changed) {
-            changed = false;
-            for (FD fd : funcDependencies)
-                if (attrs.containsAll(fd.getLhs())) {
-                    if (fd.getRhs() != null && !attrs.containsAll(fd.getRhs())) {
-                        attrs.addAll(fd.getRhs());
-                        changed = true;
-                    }
-                }
+
+    static Set<Set<String>> findCandidateKeys(Set<FD> fds, Set<String> attributes) {
+        Set<Set<String>> candKeys = new HashSet<>();
+
+        Set<String> left = new HashSet<>();
+        Set<String> right = new HashSet<>();
+        for (FD fd : fds) {
+            left.addAll(fd.getLhs());
+            right.addAll(fd.getRhs());
+        }
+        Set<String> middle = Sets.intersection(left, right);
+        left = Sets.difference(left, middle);
+        right = Sets.difference(right, middle);
+
+        Set<String> attrClsr = attributeClosure(left, fds);
+        if (attrClsr.containsAll(attributes)) {
+            candKeys.add(left);
+            return candKeys;
+        }
+        return null;
+    }
+
+    static Set<String> getAllAttr(Set<FD> fds) {
+        Set<String> attrs = new HashSet<>();
+        for (FD fd : fds) {
+            attrs.addAll(fd.getLhs());
+            attrs.addAll(fd.getRhs());
         }
         return attrs;
-    }
-
-    static Set<FD> removeFD(Set<FD> fds, FD fd) {
-        return fds.stream().filter(f -> !f.equals(fd)).collect(Collectors.toSet());
     }
 }

@@ -1,8 +1,8 @@
 package logic;
 
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +12,7 @@ public class CanCoverTests {
     private Set<FD> getFds(String[][][] arr) {
         Set<FD> fds = new HashSet<>();
         for (String[][] fd : arr)
-            fds.add(new FD(Arrays.asList(fd[0]), Arrays.asList(fd[1])));
+            fds.add(new FD(Sets.newHashSet(fd[0]), Sets.newHashSet(fd[1])));
         return fds;
     }
 
