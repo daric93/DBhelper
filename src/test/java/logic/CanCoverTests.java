@@ -1,13 +1,12 @@
 package logic;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CanCoverTests {
     private Set<FD> getFds(String[][][] arr) {
@@ -30,38 +29,38 @@ public class CanCoverTests {
                 {{"B"}, {"C"}}
         };
 
+        Set<FD> inFDs = getFds(arr);
         Set<FD> outFDs = getFds(result);
-        Structure str = new Structure(getFds(arr));
 
-        assertTrue(str.canonicalCover().equals(outFDs));
+        assertEquals(outFDs, Structure.canonicalCover(inFDs));
 
     }
 
     @Test
     public void canonicalCoverTest2() {
         String[][][] arr = {
-                {{"A","B"}, {"C"}},
+                {{"A", "B"}, {"C"}},
                 {{"B"}, {"E"}},
-                {{"C","F"}, {"D"}},
+                {{"C", "F"}, {"D"}},
                 {{"C"}, {"A"}},
                 {{"B"}, {"F"}},
-                {{"C","E"}, {"F"}},
-                {{"C","D"}, {"B"}},
+                {{"C", "E"}, {"F"}},
+                {{"C", "D"}, {"B"}},
                 {{"B"}, {"C"}}
         };
         String[][][] result = {
                 {{"B"}, {"C"}},
                 {{"B"}, {"E"}},
-                {{"C","F"}, {"D"}},
-                {{"C"},{"A"}},
-                {{"C","E"}, {"F"}},
-                {{"C","D"}, {"B"}}
+                {{"C", "F"}, {"D"}},
+                {{"C"}, {"A"}},
+                {{"C", "E"}, {"F"}},
+                {{"C", "D"}, {"B"}}
         };
 
+        Set<FD> inFDs = getFds(arr);
         Set<FD> outFDs = getFds(result);
-        Structure str = new Structure(getFds(arr));
 
-        assertEquals(outFDs, str.canonicalCover());
+        assertEquals(outFDs, Structure.canonicalCover(inFDs));
 
     }
 
@@ -69,16 +68,16 @@ public class CanCoverTests {
     public void canonicalCoverTest3() {
         String[][][] arr = {
                 {{"A"}, {"C"}},
-                {{"A","B"}, {"C"}}
+                {{"A", "B"}, {"C"}}
         };
         String[][][] result = {
-                {{"A"},{"C"}}
+                {{"A"}, {"C"}}
         };
 
+        Set<FD> inFDs = getFds(arr);
         Set<FD> outFDs = getFds(result);
-        Structure str = new Structure(getFds(arr));
 
-        assertTrue(str.canonicalCover().equals(outFDs));
+        assertEquals(outFDs, Structure.canonicalCover(inFDs));
 
     }
 
@@ -86,17 +85,17 @@ public class CanCoverTests {
     public void canonicalCoverTest4() {
         String[][][] arr = {
                 {{"A"}, {"C"}},
-                {{"A","B"}, {"C","D"}}
+                {{"A", "B"}, {"C", "D"}}
         };
         String[][][] result = {
-                {{"A","B"},{"D"}},
+                {{"A", "B"}, {"D"}},
                 {{"A"}, {"C"}}
         };
 
+        Set<FD> inFDs = getFds(arr);
         Set<FD> outFDs = getFds(result);
-        Structure str = new Structure(getFds(arr));
 
-        assertTrue(str.canonicalCover().equals(outFDs));
+        assertEquals(outFDs, Structure.canonicalCover(inFDs));
 
     }
 
@@ -104,22 +103,22 @@ public class CanCoverTests {
     public void canonicalCoverTest5() {
         String[][][] arr = {
                 {{"A"}, {"D"}},
-                {{"B","C"}, {"A","D"}},
+                {{"B", "C"}, {"A", "D"}},
                 {{"C"}, {"B"}},
                 {{"E"}, {"A"}},
                 {{"E"}, {"D"}}
         };
         String[][][] result = {
-                {{"A"},{"D"}},
+                {{"A"}, {"D"}},
                 {{"C"}, {"B"}},
                 {{"C"}, {"A"}},
-                {{"E"},{"A"}}
+                {{"E"}, {"A"}}
         };
 
+        Set<FD> inFDs = getFds(arr);
         Set<FD> outFDs = getFds(result);
-        Structure str = new Structure(getFds(arr));
 
-        assertEquals(outFDs, str.canonicalCover());
+        assertEquals(outFDs, Structure.canonicalCover(inFDs));
 
     }
 }

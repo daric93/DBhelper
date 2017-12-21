@@ -1,13 +1,14 @@
 package logic;
 
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import static logic.Structure.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 public class FDTest {
@@ -20,11 +21,12 @@ public class FDTest {
         Set<FD> fds = new HashSet<>();
         fds.add(fd1);
         fds.add(fd2);
-        FD result = new FD(Arrays.asList("A"), Arrays.asList("B"));
-        ;
-        fd1.removeExtraneousLHS(fds);
 
-        assertEquals(result, fd1);
+        Set<FD> result = new HashSet<>();
+        result.add(fd1);
+        result.add(fd2);
+
+        assertEquals(result, removeExtrLHS(fds));
     }
 
     @Test
@@ -36,10 +38,11 @@ public class FDTest {
         fds.add(fd1);
         fds.add(fd2);
 
-        FD result = new FD(Arrays.asList("A"), Arrays.asList("C"));
-        fd1.removeExtraneousLHS(fds);
+        Set<FD> result = new HashSet<>();
+        result.add(new FD(Arrays.asList("A"), Arrays.asList("C")));
+        result.add(fd2);
 
-        assertEquals(result, fd1);
+        assertEquals(result, removeExtrLHS(fds));
     }
 
     @Test
@@ -53,10 +56,12 @@ public class FDTest {
         fds.add(fd2);
         fds.add(fd3);
 
-        FD result = new FD(Arrays.asList("A"), Arrays.asList("D"));
-        fd1.removeExtraneousLHS(fds);
+        Set<FD> result = new HashSet<>();
+        result.add(fd3);
+        result.add(fd2);
+        result.add(fd3);
 
-        assertEquals(result, fd1);
+        assertEquals(result, removeExtrLHS(fds));
     }
 
     @Test
@@ -70,16 +75,18 @@ public class FDTest {
         fds.add(fd2);
         fds.add(fd3);
 
-        FD result = new FD(Arrays.asList("C", "E"), Arrays.asList("F"));
-        fd1.removeExtraneousLHS(fds);
+        Set<FD> result = new HashSet<>();
+        result.add(fd1);
+        result.add(fd2);
+        result.add(fd3);
 
-        assertEquals(result, fd1);
+        assertEquals(result, removeExtrLHS(fds));
     }
 
     @Test
-    public void removeExtraneousLHSExtrTest5(){
+    public void removeExtraneousLHSExtrTest5() {
         FD fd1 = new FD(Arrays.asList("A"), Arrays.asList("D"));
-        FD fd2 = new FD(Arrays.asList("B","C"), Arrays.asList("A","D"));
+        FD fd2 = new FD(Arrays.asList("B", "C"), Arrays.asList("A", "D"));
         FD fd3 = new FD(Arrays.asList("C"), Arrays.asList("B"));
 
         Set<FD> fds = new HashSet<>();
@@ -87,10 +94,12 @@ public class FDTest {
         fds.add(fd2);
         fds.add(fd3);
 
-        FD result = new FD(Arrays.asList("C"), Arrays.asList("A","D"));
-        fd2.removeExtraneousLHS(fds);
+        Set<FD> result = new HashSet<>();
+        result.add(fd1);
+        result.add(fd3);
+        result.add(new FD(Arrays.asList("C"), Arrays.asList("A", "D")));
 
-        assertEquals(result, fd2);
+        assertEquals(result, removeExtrLHS(fds));
     }
 
     @Test
@@ -102,10 +111,11 @@ public class FDTest {
         fds.add(fd1);
         fds.add(fd2);
 
-        FD result = new FD(Arrays.asList("C"), Arrays.asList("F"));
-        fd1.removeExtraneousRHS(fds);
+        Set<FD> result = new HashSet<>();
+        result.add(fd1);
+        result.add(fd2);
 
-        assertEquals(result, fd1);
+        assertEquals(result, removeExtrRHS(fds));
     }
 
     @Test
@@ -119,10 +129,11 @@ public class FDTest {
         fds.add(fd2);
         fds.add(fd3);
 
-        FD result = new FD(Arrays.asList("A"), null);
-        fd3.removeExtraneousRHS(fds);
+        Set<FD> result = new HashSet<>();
+        result.add(fd1);
+        result.add(fd2);
 
-        assertEquals(result, fd3);
+        assertEquals(result, removeExtrRHS(fds));
     }
 
     @Test
@@ -136,7 +147,7 @@ public class FDTest {
         Set<FD> fds = new HashSet<>();
         fds.add(fd);
 
-        assertIterableEquals(fd.splitRHS(), result);
+        assertIterableEquals(result, splitRHS(fds));
     }
 
     @Test
@@ -149,7 +160,26 @@ public class FDTest {
         Set<FD> fds = new HashSet<>();
         fds.add(fd);
 
-        assertIterableEquals(fd.splitRHS(), result);
+        assertEquals(result, splitRHS(fds));
+    }
+
+    @Test
+    public void splitRHSTest3() {
+        FD fd1 = new FD(Arrays.asList("A"), Arrays.asList("B", "C"));
+        FD fd2 = new FD(Arrays.asList("B"), Arrays.asList("B", "C"));
+
+        Set<FD> result = new HashSet<>();
+        result.add(new FD(Arrays.asList("A"), Arrays.asList("B")));
+        result.add(new FD(Arrays.asList("A"), Arrays.asList("C")));
+        result.add(new FD(Arrays.asList("B"), Arrays.asList("B")));
+        result.add(new FD(Arrays.asList("B"), Arrays.asList("C")));
+
+
+        Set<FD> fds = new HashSet<>();
+        fds.add(fd1);
+        fds.add(fd2);
+
+        assertEquals(result, splitRHS(fds));
     }
 
 }
