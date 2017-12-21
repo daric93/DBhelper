@@ -8,6 +8,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static logic.Structure.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
@@ -180,6 +181,95 @@ public class FDTest {
         fds.add(fd2);
 
         assertEquals(result, splitRHS(fds));
+    }
+
+    @Test
+    public void findCandidateKeysTest1() {
+        Set<FD> fds = new HashSet<>();
+        fds.add(new FD(newHashSet("A"), newHashSet("B")));
+        fds.add(new FD(newHashSet("B"), newHashSet("C")));
+
+        Set<Set<String>> result = new HashSet<>();
+        result.add(newHashSet("A"));
+
+        assertEquals(result, findCandidateKeys(fds, newHashSet("A", "B", "C")));
+
+    }
+
+    @Test
+    public void findCandidateKeysTest2() {
+        Set<FD> fds = new HashSet<>();
+        fds.add(new FD(newHashSet("A", "B"), newHashSet("C")));
+        fds.add(new FD(newHashSet("C"), newHashSet("B")));
+        fds.add(new FD(newHashSet("C"), newHashSet("D")));
+
+
+        Set<Set<String>> result = new HashSet<>();
+        result.add(newHashSet("A", "B"));
+        result.add(newHashSet("A", "C"));
+
+        assertEquals(result, findCandidateKeys(fds, newHashSet("A", "B", "C", "D")));
+
+    }
+
+    @Test
+    public void findCandidateKeysTest3() {
+        Set<FD> fds = new HashSet<>();
+        fds.add(new FD(newHashSet("A"), newHashSet("B")));
+        fds.add(new FD(newHashSet("B"), newHashSet("C")));
+        fds.add(new FD(newHashSet("C"), newHashSet("A")));
+
+
+        Set<Set<String>> result = new HashSet<>();
+        result.add(newHashSet("A"));
+        result.add(newHashSet("B"));
+        result.add(newHashSet("C"));
+
+        assertEquals(result, findCandidateKeys(fds, newHashSet("A", "B", "C")));
+
+    }
+
+    @Test
+    public void attributeClosureTest() {
+        Set<FD> fds = new HashSet<>();
+        FD fd1 = new FD(newHashSet("A", "B"), newHashSet("C"));
+        FD fd2 = new FD(newHashSet("C"), newHashSet("B"));
+        FD fd3 = new FD(newHashSet("C"), newHashSet("D"));
+        FD fd4 = new FD(newHashSet("N"), newHashSet("N"));
+        fds.add(fd1);
+        fds.add(fd2);
+        fds.add(fd3);
+        fds.add(fd4);
+
+        assertEquals(newHashSet("A", "B", "C", "D"), attributeClosure(fd1.getLhs(), fds));
+        assertEquals(newHashSet("C", "B", "D"), attributeClosure(fd2.getLhs(), fds));
+        assertEquals(newHashSet("C", "B", "D"), attributeClosure(fd3.getLhs(), fds));
+        assertEquals(newHashSet("N"), attributeClosure(fd4.getLhs(), fds));
+
+    }
+
+    @Test
+    public void removeFDTest() {
+        Set<FD> fds = new HashSet<>();
+        FD fd1 = new FD(newHashSet("A", "B"), newHashSet("C"));
+        FD fd2 = new FD(newHashSet("C"), newHashSet("B"));
+        FD fd3 = new FD(newHashSet("C"), newHashSet("D"));
+        FD fd4 = new FD(newHashSet("N"), newHashSet("N"));
+        fds.add(fd1);
+        fds.add(fd2);
+        fds.add(fd3);
+        fds.add(fd4);
+
+        Set<FD> result1 = newHashSet(fd1, fd2, fd3);
+        Set<FD> result2 = newHashSet(fd2, fd3, fd4);
+        Set<FD> result3 = newHashSet(fd1, fd2, fd3, fd4);
+
+
+        assertAll("removeFD",
+                () -> assertEquals(result1, removeFD(fds, fd4)),
+                () -> assertEquals(result2, removeFD(fds, fd1)),
+                () -> assertEquals(result3, removeFD(fds, new FD(newHashSet("C"), newHashSet("A"))))
+        );
     }
 
 }

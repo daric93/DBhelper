@@ -2,10 +2,11 @@ package logic;
 
 import com.google.common.collect.Sets;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import static com.google.common.collect.Sets.*;
 
 public class Structure {
 
@@ -58,7 +59,7 @@ public class Structure {
             changed = false;
             for (FD fd : fds)
                 if (attrClosure.containsAll(fd.getLhs())) {
-                    changed = attrs.addAll(fd.getRhs());
+                    changed = attrClosure.addAll(fd.getRhs());
                 }
         }
         return attrClosure;
@@ -112,14 +113,28 @@ public class Structure {
         }
         Set<String> middle = Sets.intersection(left, right);
         left = Sets.difference(left, middle);
-        right = Sets.difference(right, middle);
 
-        Set<String> attrClsr = attributeClosure(left, fds);
-        if (attrClsr.containsAll(attributes)) {
-            candKeys.add(left);
-            return candKeys;
+//        Set<String> attrClsr = attributeClosure(left, fds);
+//        if (attrClsr.containsAll(attributes)) {
+//            candKeys.add(left);
+//            return candKeys;
+//        }
+        Set<Set<String>> powerSet = powerSet(middle);
+        boolean keyFound = false;
+        int keySize = 0;
+        for (Set<String> set : powerSet) {
+            Set<String> union = Sets.union(left, set);
+            if (!keyFound || keySize == union.size()) {
+                Set<String> closure = attributeClosure(union, fds);
+                if (closure.containsAll(attributes)) {
+                    candKeys.add(union);
+                    keyFound = true;
+                    keySize = union.size();
+                }
+            }//TODO: sort powerSet
         }
-        return null;
+
+        return candKeys;
     }
 
     static Set<String> getAllAttr(Set<FD> fds) {
