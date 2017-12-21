@@ -114,11 +114,6 @@ public class Structure {
         Set<String> middle = Sets.intersection(left, right);
         left = Sets.difference(left, middle);
 
-//        Set<String> attrClsr = attributeClosure(left, fds);
-//        if (attrClsr.containsAll(attributes)) {
-//            candKeys.add(left);
-//            return candKeys;
-//        }
         Set<Set<String>> powerSet = powerSet(middle);
         boolean keyFound = false;
         int keySize = 0;
