@@ -2,13 +2,14 @@ package logic;
 
 import com.google.common.collect.Sets;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Sets.*;
+import static com.google.common.collect.Sets.powerSet;
 
-public class Structure {
+public class Relations {
 
     public void isLossless() {
 
