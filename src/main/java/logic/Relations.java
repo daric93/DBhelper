@@ -5,6 +5,8 @@ import com.google.common.collect.Sets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Sets.powerSet;
+
 public class Relations {
 
     public static boolean isLossless(Decomposition decomposition) {
@@ -21,7 +23,21 @@ public class Relations {
 
 
     public static Set<Table> thirdNF(Set<FD> funcDep) {
-        return null;
+        Set<Table> tables = new HashSet<>();
+        Set<Set<String>> candidateKeys = findCandidateKeys(funcDep, getAllAttr(funcDep));
+        Set<FD> canonicalCover = canonicalCover(funcDep);
+
+        Set<FD> fdSet = combineRHS(canonicalCover);
+        boolean containsCandidateKey = false;
+        for (FD fd : fdSet) {
+            Table table = new Table(Sets.union(fd.getRhs(), fd.getLhs()));
+            tables.add(table);
+            if (!containsCandidateKey)
+                containsCandidateKey = candidateKeys.stream().anyMatch(table.getAttributes()::containsAll);
+        }
+        if (!containsCandidateKey)
+            tables.add(new Table(candidateKeys.iterator().next()));
+        return tables;
     }
 
     public static Set<Table> bcNF(Set<FD> funcDep) {
@@ -63,7 +79,7 @@ public class Relations {
     static Set<FD> removeExtrLHS(Set<FD> funcDependencies) {
         Set<FD> fds = new HashSet<>();
         funcDependencies.forEach(fd -> {
-            Set<Set<String>> powerSet = Sets.powerSet(fd.getLhs());
+            Set<Set<String>> powerSet = powerSet(fd.getLhs());
             for (Set<String> sub : powerSet) {
                 Set<String> attributeClosure = attributeClosure(sub, funcDependencies);
                 if (attributeClosure.containsAll(fd.getRhs())) {
