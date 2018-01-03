@@ -1,27 +1,21 @@
 package logic;
 
+import java.util.Set;
+
+import static com.google.common.collect.Sets.newHashSet;
+
 public class Table {
-    private String[] primaryKey;
-    private String[] attributes;
+    private final Set<String> attributes;
 
-    public Table(String[] primaryKey, String[] attributes) {
-        this.primaryKey = primaryKey;
+    Table(String... attributes) {
+        this.attributes = newHashSet(attributes);
+    }
+
+    Table(Set<String> attributes) {
         this.attributes = attributes;
     }
 
-    public String[] getPrimaryKey() {
-        return primaryKey;
-    }
-
-    public void setPrimaryKey(String[] primaryKey) {
-        this.primaryKey = primaryKey;
-    }
-
-    public String[] getAttributes() {
+    public Set<String> getAttributes() {
         return attributes;
-    }
-
-    public void setAttributes(String[] attributes) {
-        this.attributes = attributes;
     }
 }

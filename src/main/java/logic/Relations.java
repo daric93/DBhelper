@@ -2,36 +2,30 @@ package logic;
 
 import com.google.common.collect.Sets;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.google.common.collect.Sets.powerSet;
 
 public class Relations {
 
-    public void isLossless() {
-
+    public static boolean isLossless(Decomposition decomposition) {
+        return false;
     }
 
-    public void isDependencyPreserving() {
-
+    public static boolean isDependencyPreserving(Decomposition decomposition) {
+        return false;
     }
 
-    public void firstNF() {
+    static Set<Table> secondNF(Set<FD> funcDep) {
+        return null;
     }
 
-    public void secondNF() {
 
+    public static Set<Table> thirdNF(Set<FD> funcDep) {
+        return null;
     }
 
-    public void thirdNF() {
-
-    }
-
-    public void bcNF() {
-
+    public static Set<Table> bcNF(Set<FD> funcDep) {
+        return null;
     }
 
     public void fourthNF() {
@@ -140,5 +134,16 @@ public class Relations {
             attrs.addAll(fd.getRhs());
         }
         return attrs;
+    }
+
+    static Set<FD> combineRHS(Set<FD> fds) {
+        Set<FD> funcDep = new HashSet<>();
+        Map<Set<String>, List<FD>> collect = fds.stream().collect(Collectors.groupingBy(FD::getLhs));
+        collect.forEach((k, v) -> {
+            Set<String> set = new HashSet<>();
+            v.forEach(fd -> set.addAll(fd.getRhs()));
+            funcDep.add(new FD(k, set));
+        });
+        return funcDep;
     }
 }

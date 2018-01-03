@@ -7,10 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static logic.Structure.*;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static logic.Relations.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FDTest {
 
@@ -270,6 +268,16 @@ public class FDTest {
                 () -> assertEquals(result2, removeFD(fds, fd1)),
                 () -> assertEquals(result3, removeFD(fds, new FD(newHashSet("C"), newHashSet("A"))))
         );
+    }
+
+    @Test
+    public void combineRHSTest1() {
+
+    }
+
+    @Test
+    public void combineRHSTest2() {
+
     }
 
 }

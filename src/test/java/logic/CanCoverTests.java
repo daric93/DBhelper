@@ -32,7 +32,7 @@ public class CanCoverTests {
         Set<FD> inFDs = getFds(arr);
         Set<FD> outFDs = getFds(result);
 
-        assertEquals(outFDs, Structure.canonicalCover(inFDs));
+        assertEquals(outFDs, Relations.canonicalCover(inFDs));
 
     }
 
@@ -60,7 +60,7 @@ public class CanCoverTests {
         Set<FD> inFDs = getFds(arr);
         Set<FD> outFDs = getFds(result);
 
-        assertEquals(outFDs, Structure.canonicalCover(inFDs));
+        assertEquals(outFDs, Relations.canonicalCover(inFDs));
 
     }
 
@@ -77,7 +77,7 @@ public class CanCoverTests {
         Set<FD> inFDs = getFds(arr);
         Set<FD> outFDs = getFds(result);
 
-        assertEquals(outFDs, Structure.canonicalCover(inFDs));
+        assertEquals(outFDs, Relations.canonicalCover(inFDs));
 
     }
 
@@ -95,7 +95,7 @@ public class CanCoverTests {
         Set<FD> inFDs = getFds(arr);
         Set<FD> outFDs = getFds(result);
 
-        assertEquals(outFDs, Structure.canonicalCover(inFDs));
+        assertEquals(outFDs, Relations.canonicalCover(inFDs));
 
     }
 
@@ -118,7 +118,7 @@ public class CanCoverTests {
         Set<FD> inFDs = getFds(arr);
         Set<FD> outFDs = getFds(result);
 
-        assertEquals(outFDs, Structure.canonicalCover(inFDs));
+        assertEquals(outFDs, Relations.canonicalCover(inFDs));
 
     }
 }
