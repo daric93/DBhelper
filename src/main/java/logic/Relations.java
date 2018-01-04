@@ -41,7 +41,41 @@ public class Relations {
     }
 
     public static Set<Table> bcNF(Set<FD> funcDep) {
-        return null;
+        Set<Table> bcNFDecomp = new HashSet<>();
+        Set<FD> canonicalCover = canonicalCover(funcDep);
+        Set<Table> thirdNFDecomposition = thirdNF(funcDep);
+
+        for (Table table : thirdNFDecomposition) {
+            bcNF(table, bcNFDecomp, canonicalCover);
+        }
+        return bcNFDecomp;
+    }
+
+    static void bcNF(Table table, Set<Table> bcNFDecomp, Set<FD> canonicalCover) {
+        Set<FD> fdSet = funcDepPerTable(table, canonicalCover);
+        Set<Set<String>> candidateKeys = findCandidateKeys(fdSet, table.getAttributes());
+        //TODO: table with no fds, where all attributes are the key
+        for (FD fd : fdSet) {
+            if (!candidateKeys.contains(fd.getLhs())) {
+                Table newTable = new Table(Sets.union(fd.getLhs(), fd.getRhs()));
+                Table oldTable = new Table(Sets.difference(table.getAttributes(), fd.getRhs()));
+                bcNF(newTable, bcNFDecomp, canonicalCover);
+                bcNF(oldTable, bcNFDecomp, canonicalCover);
+                break;
+            }
+        }
+        bcNFDecomp.add(table);
+    }
+
+    private static Set<FD> funcDepPerTable(Table table, Set<FD> canonicalCover) {
+        Set<FD> tableFds = new HashSet<>();
+        Set<String> attributes = table.getAttributes();
+
+        canonicalCover.forEach(fd -> {
+            if (attributes.containsAll(fd.getLhs()) && attributes.containsAll(fd.getRhs()))
+                tableFds.add(fd);
+        });
+        return tableFds;
     }
 
     public void fourthNF() {
