@@ -228,6 +228,17 @@ public class FDTest {
     }
 
     @Test
+    public void findCandidateKeysNoFDTest3() {
+        Set<FD> fds = new HashSet<>();
+
+        Set<Set<String>> result = new HashSet<>();
+        result.add(newHashSet("A", "B", "C"));
+
+        assertEquals(result, findCandidateKeys(fds, newHashSet("A", "B", "C")));
+
+    }
+
+    @Test
     public void attributeClosureTest() {
         Set<FD> fds = new HashSet<>();
         FD fd1 = new FD(newHashSet("A", "B"), newHashSet("C"));

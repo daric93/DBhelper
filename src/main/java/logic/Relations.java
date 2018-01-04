@@ -116,6 +116,11 @@ public class Relations {
     static Set<Set<String>> findCandidateKeys(Set<FD> fds, Set<String> attributes) {
         Set<Set<String>> candKeys = new HashSet<>();
 
+        if (fds.isEmpty()) {
+            candKeys.add(attributes);
+            return candKeys;
+        }
+
         Set<String> left = new HashSet<>();
         Set<String> right = new HashSet<>();
         for (FD fd : fds) {
