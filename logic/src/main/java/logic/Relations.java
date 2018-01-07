@@ -22,7 +22,7 @@ public class Relations {
     }
 
 
-    public static Set<Table> thirdNF(Set<FD> funcDep) {
+    public static Decomposition thirdNF(Set<FD> funcDep) {
         Set<Table> tables = new HashSet<>();
         Set<Set<String>> candidateKeys = findCandidateKeys(funcDep, getAllAttr(funcDep));
         Set<FD> canonicalCover = canonicalCover(funcDep);
@@ -37,18 +37,18 @@ public class Relations {
         }
         if (!containsCandidateKey)
             tables.add(new Table(candidateKeys.iterator().next()));
-        return tables;
+        return new Decomposition(tables,canonicalCover);
     }
 
-    public static Set<Table> bcNF(Set<FD> funcDep) {
+    public static Decomposition bcNF(Set<FD> funcDep) {
         Set<Table> bcNFDecomp = new HashSet<>();
-        Set<FD> canonicalCover = canonicalCover(funcDep);
-        Set<Table> thirdNFDecomposition = thirdNF(funcDep);
+        Decomposition thirdNFDecomposition = thirdNF(funcDep);
+        Set<FD> canonicalCover = thirdNFDecomposition.getFuncDependencies();
 
-        for (Table table : thirdNFDecomposition) {
+        for (Table table : thirdNFDecomposition.getTables()) {
             bcNF(table, bcNFDecomp, canonicalCover);
         }
-        return bcNFDecomp;
+        return new Decomposition(bcNFDecomp, canonicalCover);
     }
 
     static void bcNF(Table table, Set<Table> bcNFDecomp, Set<FD> canonicalCover) {
@@ -91,7 +91,7 @@ public class Relations {
     }
 
 
-    static Set<FD> canonicalCover(Set<FD> funcDependencies) {
+    public static Set<FD> canonicalCover(Set<FD> funcDependencies) {
         Set<FD> fdSet = splitRHS(funcDependencies);
         fdSet = removeExtrLHS(fdSet);
         return removeExtrRHS(fdSet);
@@ -147,7 +147,7 @@ public class Relations {
     }
 
 
-    static Set<Set<String>> findCandidateKeys(Set<FD> fds, Set<String> attributes) {
+    public static Set<Set<String>> findCandidateKeys(Set<FD> fds, Set<String> attributes) {
         Set<Set<String>> candKeys = new HashSet<>();
 
         if (fds.isEmpty()) {

@@ -19,7 +19,7 @@ public class ThirdNFTest {
                 new Table("Tournament", "Year", "Winner")
         );
 
-        assertEquals(expected, thirdNF(fds));
+        assertEquals(expected, thirdNF(fds).getTables());
     }
 
     @Test
@@ -33,7 +33,7 @@ public class ThirdNFTest {
                 new Table("Winner", "Date of Birth")
         );
 
-        assertEquals(expected, thirdNF(fds));
+        assertEquals(expected, thirdNF(fds).getTables());
 
     }
 
@@ -50,7 +50,7 @@ public class ThirdNFTest {
                 new Table("Country", "Flag")
         );
 
-        assertEquals(expected, thirdNF(fds));
+        assertEquals(expected, thirdNF(fds).getTables());
     }
 
     @Test
@@ -66,7 +66,7 @@ public class ThirdNFTest {
                 new Table("Country", "Flag")
         );
 
-        assertEquals(expected, thirdNF(fds));
+        assertEquals(expected, thirdNF(fds).getTables());
     }
 
     @Test
@@ -81,6 +81,6 @@ public class ThirdNFTest {
                 new Table("artist", "msin")
         );
 
-        assertEquals(expectedDecomposition, thirdNF(fds));
+        assertEquals(expectedDecomposition, thirdNF(fds).getTables());
     }
 }

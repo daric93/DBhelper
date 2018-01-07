@@ -22,7 +22,7 @@ public class BoyceCoddNFTest {
                 new Table("A", "B")
         );
 
-        assertEquals(expectedBCNFDecomp, bcNF(fds));
+        assertEquals(expectedBCNFDecomp, bcNF(fds).getTables());
     }
 
     @Test
