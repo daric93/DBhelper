@@ -4,10 +4,14 @@ import java.util.Objects;
 import java.util.Set;
 
 public class FD {
-    private final Set<String> lhs;
-    private final Set<String> rhs;
+    private Set<String> lhs;
+    private Set<String> rhs;
 
-    FD(Set<String> lhs, Set<String> rhs) {
+    public FD() {
+
+    }
+
+    public FD(Set<String> lhs, Set<String> rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
@@ -18,6 +22,14 @@ public class FD {
 
     public Set<String> getRhs() {
         return rhs;
+    }
+
+    public void setLhs(Set<String> lhs) {
+        this.lhs = lhs;
+    }
+
+    public void setRhs(Set<String> rhs) {
+        this.rhs = rhs;
     }
 
     @Override
