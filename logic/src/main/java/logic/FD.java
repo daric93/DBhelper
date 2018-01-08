@@ -4,31 +4,31 @@ import java.util.Objects;
 import java.util.Set;
 
 public class FD {
-    private Set<String> lhs;
-    private Set<String> rhs;
+    private Set<Attribute> lhs;
+    private Set<Attribute> rhs;
 
     public FD() {
 
     }
 
-    public FD(Set<String> lhs, Set<String> rhs) {
+    public FD(Set<Attribute> lhs, Set<Attribute> rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
 
-    public Set<String> getLhs() {
+    public Set<Attribute> getLhs() {
         return lhs;
     }
 
-    public Set<String> getRhs() {
+    public Set<Attribute> getRhs() {
         return rhs;
     }
 
-    public void setLhs(Set<String> lhs) {
+    public void setLhs(Set<Attribute> lhs) {
         this.lhs = lhs;
     }
 
-    public void setRhs(Set<String> rhs) {
+    public void setRhs(Set<Attribute> rhs) {
         this.rhs = rhs;
     }
 

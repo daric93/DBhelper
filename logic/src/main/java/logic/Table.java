@@ -1,23 +1,42 @@
 package logic;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 
 public class Table {
-    private final Set<String> attributes;
+    private final Set<Attribute> attributes;
+    private Set<Attribute> primaryKey;
+    private Map<Set<Attribute>, Table> foreignKeys;
 
-    Table(String... attributes) {
+    Table(Attribute... attributes) {
         this.attributes = newHashSet(attributes);
     }
 
-    Table(Set<String> attributes) {
+    Table(Set<Attribute> attributes) {
         this.attributes = attributes;
     }
 
-    public Set<String> getAttributes() {
+    public Set<Attribute> getAttributes() {
         return attributes;
+    }
+
+    public Set<Attribute> getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public void setPrimaryKey(Set<Attribute> primaryKey) {
+        this.primaryKey = primaryKey;
+    }
+
+    public Map<Set<Attribute>, Table> getForeignKeys() {
+        return foreignKeys;
+    }
+
+    public void setForeignKeys(Map<Set<Attribute>, Table> foreignKeys) {
+        this.foreignKeys = foreignKeys;
     }
 
     @Override
@@ -38,6 +57,8 @@ public class Table {
     public String toString() {
         return "Table{" +
                 "attributes=" + attributes +
+                ", primaryKey=" + primaryKey +
+                ", foreignKeys=" + foreignKeys +
                 '}';
     }
 }

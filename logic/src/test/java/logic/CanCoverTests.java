@@ -6,13 +6,16 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.Set;
 
+import static logic.FDTest.newAttributeSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CanCoverTests {
+
+
     private Set<FD> getFds(String[][][] arr) {
         Set<FD> fds = new HashSet<>();
         for (String[][] fd : arr)
-            fds.add(new FD(Sets.newHashSet(fd[0]), Sets.newHashSet(fd[1])));
+            fds.add(new FD(newAttributeSet(fd[0]), newAttributeSet(fd[1])));
         return fds;
     }
 

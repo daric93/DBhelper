@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static logic.FDTest.newAttributeSet;
 import static logic.Relations.thirdNF;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -13,10 +14,10 @@ public class ThirdNFTest {
     @Test
     public void noTransitiveDepTest() {
         Set<FD> fds = newHashSet(
-                new FD(newHashSet("Tournament", "Year"), newHashSet("Winner"))
+                new FD(newAttributeSet("Tournament", "Year"), newAttributeSet("Winner"))
         );
         Set<Table> expected = newHashSet(
-                new Table("Tournament", "Year", "Winner")
+                new Table(newAttributeSet("Tournament", "Year", "Winner"))
         );
 
         assertEquals(expected, thirdNF(fds).getTables());
@@ -25,12 +26,12 @@ public class ThirdNFTest {
     @Test
     public void oneTransitiveDepTest() {
         Set<FD> fds = newHashSet(
-                new FD(newHashSet("Tournament", "Year"), newHashSet("Winner")),
-                new FD(newHashSet("Winner"), newHashSet("Date of Birth"))
+                new FD(newAttributeSet("Tournament", "Year"), newAttributeSet("Winner")),
+                new FD(newAttributeSet("Winner"), newAttributeSet("Date of Birth"))
         );
         Set<Table> expected = newHashSet(
-                new Table("Tournament", "Year", "Winner"),
-                new Table("Winner", "Date of Birth")
+                new Table(newAttributeSet("Tournament", "Year", "Winner")),
+                new Table(newAttributeSet("Winner", "Date of Birth"))
         );
 
         assertEquals(expected, thirdNF(fds).getTables());
@@ -40,14 +41,14 @@ public class ThirdNFTest {
     @Test
     public void multipleTransitiveDepTest() {
         Set<FD> fds = newHashSet(
-                new FD(newHashSet("Tournament", "Year"), newHashSet("Winner", "Country")),
-                new FD(newHashSet("Winner"), newHashSet("Date of Birth", "Nationality")),
-                new FD(newHashSet("Country"), newHashSet("Flag"))
+                new FD(newAttributeSet("Tournament", "Year"), newAttributeSet("Winner", "Country")),
+                new FD(newAttributeSet("Winner"), newAttributeSet("Date of Birth", "Nationality")),
+                new FD(newAttributeSet("Country"), newAttributeSet("Flag"))
         );
         Set<Table> expected = newHashSet(
-                new Table("Tournament", "Year", "Winner", "Country"),
-                new Table("Winner", "Date of Birth", "Nationality"),
-                new Table("Country", "Flag")
+                new Table(newAttributeSet("Tournament", "Year", "Winner", "Country")),
+                new Table(newAttributeSet("Winner", "Date of Birth", "Nationality")),
+                new Table(newAttributeSet("Country", "Flag"))
         );
 
         assertEquals(expected, thirdNF(fds).getTables());
@@ -56,14 +57,14 @@ public class ThirdNFTest {
     @Test
     public void recursiveTransitiveDepTest() {
         Set<FD> fds = newHashSet(
-                new FD(newHashSet("Tournament", "Year"), newHashSet("Winner")),
-                new FD(newHashSet("Winner"), newHashSet("Date of Birth", "Country")),
-                new FD(newHashSet("Country"), newHashSet("Flag"))
+                new FD(newAttributeSet("Tournament", "Year"), newAttributeSet("Winner")),
+                new FD(newAttributeSet("Winner"), newAttributeSet("Date of Birth", "Country")),
+                new FD(newAttributeSet("Country"), newAttributeSet("Flag"))
         );
         Set<Table> expected = newHashSet(
-                new Table("Tournament", "Year", "Winner"),
-                new Table("Winner", "Date of Birth", "Country"),
-                new Table("Country", "Flag")
+                new Table(newAttributeSet("Tournament", "Year", "Winner")),
+                new Table(newAttributeSet("Winner", "Date of Birth", "Country")),
+                new Table(newAttributeSet("Country", "Flag"))
         );
 
         assertEquals(expected, thirdNF(fds).getTables());
@@ -72,13 +73,13 @@ public class ThirdNFTest {
     @Test
     public void losslessJoinDecompositionTest() {
         HashSet<FD> fds = newHashSet(
-                new FD(newHashSet("artist"), newHashSet("members", "genre")),
-                new FD(newHashSet("msin"), newHashSet("mfn", "mln", "inst"))
+                new FD(newAttributeSet("artist"), newAttributeSet("members", "genre")),
+                new FD(newAttributeSet("msin"), newAttributeSet("mfn", "mln", "inst"))
         );
         HashSet<Table> expectedDecomposition = newHashSet(
-                new Table("artist", "members", "genre"),
-                new Table("msin", "mfn", "mln", "inst"),
-                new Table("artist", "msin")
+                new Table(newAttributeSet("artist", "members", "genre")),
+                new Table(newAttributeSet("msin", "mfn", "mln", "inst")),
+                new Table(newAttributeSet("artist", "msin"))
         );
 
         assertEquals(expectedDecomposition, thirdNF(fds).getTables());

@@ -24,7 +24,7 @@ public class Relations {
 
     public static Decomposition thirdNF(Set<FD> funcDep) {
         Set<Table> tables = new HashSet<>();
-        Set<Set<String>> candidateKeys = findCandidateKeys(funcDep, getAllAttr(funcDep));
+        Set<Set<Attribute>> candidateKeys = findCandidateKeys(funcDep, getAllAttr(funcDep));
         Set<FD> canonicalCover = canonicalCover(funcDep);
 
         Set<FD> fdSet = combineRHS(canonicalCover);
@@ -53,7 +53,7 @@ public class Relations {
 
     static void bcNF(Table table, Set<Table> bcNFDecomp, Set<FD> canonicalCover) {
         Set<FD> fdSet = funcDepPerTable(table, canonicalCover);
-        Set<Set<String>> candidateKeys = findCandidateKeys(fdSet, table.getAttributes());
+        Set<Set<Attribute>> candidateKeys = findCandidateKeys(fdSet, table.getAttributes());
         //TODO: table with no fds, where all attributes are the key
         for (FD fd : fdSet) {
             if (!candidateKeys.contains(fd.getLhs())) {
@@ -69,7 +69,7 @@ public class Relations {
 
     private static Set<FD> funcDepPerTable(Table table, Set<FD> canonicalCover) {
         Set<FD> tableFds = new HashSet<>();
-        Set<String> attributes = table.getAttributes();
+        Set<Attribute> attributes = table.getAttributes();
 
         canonicalCover.forEach(fd -> {
             if (attributes.containsAll(fd.getLhs()) && attributes.containsAll(fd.getRhs()))
@@ -97,8 +97,8 @@ public class Relations {
         return removeExtrRHS(fdSet);
     }
 
-    static Set<String> attributeClosure(Set<String> attrs, Set<FD> fds) {
-        Set<String> attrClosure = new HashSet<>(attrs);
+    static Set<Attribute> attributeClosure(Set<Attribute> attrs, Set<FD> fds) {
+        Set<Attribute> attrClosure = new HashSet<>(attrs);
         boolean changed = true;
         while (changed) {
             changed = false;
@@ -113,9 +113,9 @@ public class Relations {
     static Set<FD> removeExtrLHS(Set<FD> funcDependencies) {
         Set<FD> fds = new HashSet<>();
         funcDependencies.forEach(fd -> {
-            Set<Set<String>> powerSet = powerSet(fd.getLhs());
-            for (Set<String> sub : powerSet) {
-                Set<String> attributeClosure = attributeClosure(sub, funcDependencies);
+            Set<Set<Attribute>> powerSet = powerSet(fd.getLhs());
+            for (Set<Attribute> sub : powerSet) {
+                Set<Attribute> attributeClosure = attributeClosure(sub, funcDependencies);
                 if (attributeClosure.containsAll(fd.getRhs())) {
                     fds.add(new FD(sub, fd.getRhs()));
                     break;
@@ -128,7 +128,7 @@ public class Relations {
     static Set<FD> removeExtrRHS(Set<FD> funcDependencies) {
         return funcDependencies.stream()
                 .filter(fd -> {
-                    Set<String> closure = attributeClosure(fd.getLhs(), removeFD(funcDependencies, fd));
+                    Set<Attribute> closure = attributeClosure(fd.getLhs(), removeFD(funcDependencies, fd));
                     return !closure.containsAll(fd.getRhs());
                 })
                 .collect(Collectors.toSet());
@@ -137,7 +137,7 @@ public class Relations {
     static Set<FD> splitRHS(Set<FD> funcDependencies) {
         Set<FD> fds = new HashSet<>();
         for (FD fd : funcDependencies)
-            for (String attr : fd.getRhs())
+            for (Attribute attr : fd.getRhs())
                 fds.add(new FD(fd.getLhs(), Sets.newHashSet(attr)));
         return fds;
     }
@@ -147,30 +147,30 @@ public class Relations {
     }
 
 
-    public static Set<Set<String>> findCandidateKeys(Set<FD> fds, Set<String> attributes) {
-        Set<Set<String>> candKeys = new HashSet<>();
+    public static Set<Set<Attribute>> findCandidateKeys(Set<FD> fds, Set<Attribute> attributes) {
+        Set<Set<Attribute>> candKeys = new HashSet<>();
 
         if (fds.isEmpty()) {
             candKeys.add(attributes);
             return candKeys;
         }
 
-        Set<String> left = new HashSet<>();
-        Set<String> right = new HashSet<>();
+        Set<Attribute> left = new HashSet<>();
+        Set<Attribute> right = new HashSet<>();
         for (FD fd : fds) {
             left.addAll(fd.getLhs());
             right.addAll(fd.getRhs());
         }
-        Set<String> middle = Sets.intersection(left, right);
+        Set<Attribute> middle = Sets.intersection(left, right);
         left = Sets.difference(left, middle);
 
-        Set<Set<String>> powerSet = powerSet(middle);
+        Set<Set<Attribute>> powerSet = powerSet(middle);
         boolean keyFound = false;
         int keySize = 0;
-        for (Set<String> set : powerSet) {
-            Set<String> union = Sets.union(left, set);
+        for (Set<Attribute> set : powerSet) {
+            Set<Attribute> union = Sets.union(left, set);
             if (!keyFound || keySize == union.size()) {
-                Set<String> closure = attributeClosure(union, fds);
+                Set<Attribute> closure = attributeClosure(union, fds);
                 if (closure.containsAll(attributes)) {
                     candKeys.add(union);
                     keyFound = true;
@@ -182,8 +182,8 @@ public class Relations {
         return candKeys;
     }
 
-    static Set<String> getAllAttr(Set<FD> fds) {
-        Set<String> attrs = new HashSet<>();
+    static Set<Attribute> getAllAttr(Set<FD> fds) {
+        Set<Attribute> attrs = new HashSet<>();
         for (FD fd : fds) {
             attrs.addAll(fd.getLhs());
             attrs.addAll(fd.getRhs());
@@ -193,9 +193,9 @@ public class Relations {
 
     static Set<FD> combineRHS(Set<FD> fds) {
         Set<FD> funcDep = new HashSet<>();
-        Map<Set<String>, List<FD>> collect = fds.stream().collect(Collectors.groupingBy(FD::getLhs));
+        Map<Set<Attribute>, List<FD>> collect = fds.stream().collect(Collectors.groupingBy(FD::getLhs));
         collect.forEach((k, v) -> {
-            Set<String> set = new HashSet<>();
+            Set<Attribute> set = new HashSet<>();
             v.forEach(fd -> set.addAll(fd.getRhs()));
             funcDep.add(new FD(k, set));
         });

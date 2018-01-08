@@ -3,8 +3,10 @@ package logic;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static logic.Relations.*;
@@ -12,10 +14,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class FDTest {
 
+    static Set<Attribute> newAttributeSet(String... attr) {
+        return Arrays.stream(attr)
+                .map(Attribute::new)
+                .collect(Collectors.toSet());
+    }
+
     @Test
     public void removeExtraneousLHSTest1NoExtr() {
-        FD fd1 = new FD(newHashSet("A"), newHashSet("B"));
-        FD fd2 = new FD(newHashSet("A"), newHashSet("C"));
+        FD fd1 = new FD(newAttributeSet("A"), newAttributeSet("B"));
+        FD fd2 = new FD(newAttributeSet("A"), newAttributeSet("C"));
 
         Set<FD> fds = new HashSet<>();
         fds.add(fd1);
@@ -30,15 +38,15 @@ public class FDTest {
 
     @Test
     public void removeExtraneousLHSTest2Extr() {
-        FD fd1 = new FD(newHashSet("A", "B"), newHashSet("C"));
-        FD fd2 = new FD(newHashSet("A"), newHashSet("C"));
+        FD fd1 = new FD(newAttributeSet("A", "B"), newAttributeSet("C"));
+        FD fd2 = new FD(newAttributeSet("A"), newAttributeSet("C"));
 
         Set<FD> fds = new HashSet<>();
         fds.add(fd1);
         fds.add(fd2);
 
         Set<FD> result = new HashSet<>();
-        result.add(new FD(newHashSet("A"), newHashSet("C")));
+        result.add(new FD(newAttributeSet("A"), newAttributeSet("C")));
         result.add(fd2);
 
         assertEquals(result, removeExtrLHS(fds));
@@ -46,9 +54,9 @@ public class FDTest {
 
     @Test
     public void removeExtraneousLHSTest3Extr() {
-        FD fd1 = new FD(newHashSet("A", "B"), newHashSet("D"));
-        FD fd2 = new FD(newHashSet("B"), newHashSet("C"));
-        FD fd3 = new FD(newHashSet("A"), newHashSet("D"));
+        FD fd1 = new FD(newAttributeSet("A", "B"), newAttributeSet("D"));
+        FD fd2 = new FD(newAttributeSet("B"), newAttributeSet("C"));
+        FD fd3 = new FD(newAttributeSet("A"), newAttributeSet("D"));
 
         Set<FD> fds = new HashSet<>();
         fds.add(fd1);
@@ -65,9 +73,9 @@ public class FDTest {
 
     @Test
     public void removeExtraneousLHSTest4NoExtr() {
-        FD fd1 = new FD(newHashSet("C", "E"), newHashSet("F"));
-        FD fd2 = new FD(newHashSet("C", "D"), newHashSet("B"));
-        FD fd3 = new FD(newHashSet("B"), newHashSet("C"));
+        FD fd1 = new FD(newAttributeSet("C", "E"), newAttributeSet("F"));
+        FD fd2 = new FD(newAttributeSet("C", "D"), newAttributeSet("B"));
+        FD fd3 = new FD(newAttributeSet("B"), newAttributeSet("C"));
 
         Set<FD> fds = new HashSet<>();
         fds.add(fd1);
@@ -84,9 +92,9 @@ public class FDTest {
 
     @Test
     public void removeExtraneousLHSExtrTest5() {
-        FD fd1 = new FD(newHashSet("A"), newHashSet("D"));
-        FD fd2 = new FD(newHashSet("B", "C"), newHashSet("A", "D"));
-        FD fd3 = new FD(newHashSet("C"), newHashSet("B"));
+        FD fd1 = new FD(newAttributeSet("A"), newAttributeSet("D"));
+        FD fd2 = new FD(newAttributeSet("B", "C"), newAttributeSet("A", "D"));
+        FD fd3 = new FD(newAttributeSet("C"), newAttributeSet("B"));
 
         Set<FD> fds = new HashSet<>();
         fds.add(fd1);
@@ -96,15 +104,15 @@ public class FDTest {
         Set<FD> result = new HashSet<>();
         result.add(fd1);
         result.add(fd3);
-        result.add(new FD(newHashSet("C"), newHashSet("A", "D")));
+        result.add(new FD(newAttributeSet("C"), newAttributeSet("A", "D")));
 
         assertEquals(result, removeExtrLHS(fds));
     }
 
     @Test
     public void removeExtraneousRHSNoExtrTest1() {
-        FD fd1 = new FD(newHashSet("C"), newHashSet("F"));
-        FD fd2 = new FD(newHashSet("C"), newHashSet("D"));
+        FD fd1 = new FD(newAttributeSet("C"), newAttributeSet("F"));
+        FD fd2 = new FD(newAttributeSet("C"), newAttributeSet("D"));
 
         Set<FD> fds = new HashSet<>();
         fds.add(fd1);
@@ -119,9 +127,9 @@ public class FDTest {
 
     @Test
     public void removeExtraneousRHSExtrTest2() {
-        FD fd1 = new FD(newHashSet("A"), newHashSet("B"));
-        FD fd2 = new FD(newHashSet("B"), newHashSet("C"));
-        FD fd3 = new FD(newHashSet("A"), newHashSet("C"));
+        FD fd1 = new FD(newAttributeSet("A"), newAttributeSet("B"));
+        FD fd2 = new FD(newAttributeSet("B"), newAttributeSet("C"));
+        FD fd3 = new FD(newAttributeSet("A"), newAttributeSet("C"));
 
         Set<FD> fds = new HashSet<>();
         fds.add(fd1);
@@ -137,10 +145,10 @@ public class FDTest {
 
     @Test
     public void splitRHSTest1() {
-        FD fd = new FD(newHashSet("A"), newHashSet("B", "C"));
+        FD fd = new FD(newAttributeSet("A"), newAttributeSet("B", "C"));
         Set<FD> result = new HashSet<>();
-        result.add(new FD(newHashSet("A"), newHashSet("B")));
-        result.add(new FD(newHashSet("A"), newHashSet("C")));
+        result.add(new FD(newAttributeSet("A"), newAttributeSet("B")));
+        result.add(new FD(newAttributeSet("A"), newAttributeSet("C")));
 
 
         Set<FD> fds = new HashSet<>();
@@ -151,9 +159,9 @@ public class FDTest {
 
     @Test
     public void splitRHSTest2() {
-        FD fd = new FD(newHashSet("A"), newHashSet("B"));
+        FD fd = new FD(newAttributeSet("A"), newAttributeSet("B"));
         Set<FD> result = new HashSet<>();
-        result.add(new FD(newHashSet("A"), newHashSet("B")));
+        result.add(new FD(newAttributeSet("A"), newAttributeSet("B")));
 
 
         Set<FD> fds = new HashSet<>();
@@ -164,14 +172,14 @@ public class FDTest {
 
     @Test
     public void splitRHSTest3() {
-        FD fd1 = new FD(newHashSet("A"), newHashSet("B", "C"));
-        FD fd2 = new FD(newHashSet("B"), newHashSet("B", "C"));
+        FD fd1 = new FD(newAttributeSet("A"), newAttributeSet("B", "C"));
+        FD fd2 = new FD(newAttributeSet("B"), newAttributeSet("B", "C"));
 
         Set<FD> result = new HashSet<>();
-        result.add(new FD(newHashSet("A"), newHashSet("B")));
-        result.add(new FD(newHashSet("A"), newHashSet("C")));
-        result.add(new FD(newHashSet("B"), newHashSet("B")));
-        result.add(new FD(newHashSet("B"), newHashSet("C")));
+        result.add(new FD(newAttributeSet("A"), newAttributeSet("B")));
+        result.add(new FD(newAttributeSet("A"), newAttributeSet("C")));
+        result.add(new FD(newAttributeSet("B"), newAttributeSet("B")));
+        result.add(new FD(newAttributeSet("B"), newAttributeSet("C")));
 
 
         Set<FD> fds = new HashSet<>();
@@ -184,46 +192,46 @@ public class FDTest {
     @Test
     public void findCandidateKeysTest1() {
         Set<FD> fds = new HashSet<>();
-        fds.add(new FD(newHashSet("A"), newHashSet("B")));
-        fds.add(new FD(newHashSet("B"), newHashSet("C")));
+        fds.add(new FD(newAttributeSet("A"), newAttributeSet("B")));
+        fds.add(new FD(newAttributeSet("B"), newAttributeSet("C")));
 
-        Set<Set<String>> result = new HashSet<>();
-        result.add(newHashSet("A"));
+        Set<Set<Attribute>> result = new HashSet<>();
+        result.add(newAttributeSet("A"));
 
-        assertEquals(result, findCandidateKeys(fds, newHashSet("A", "B", "C")));
+        assertEquals(result, findCandidateKeys(fds, newAttributeSet("A", "B", "C")));
 
     }
 
     @Test
     public void findCandidateKeysTest2() {
         Set<FD> fds = new HashSet<>();
-        fds.add(new FD(newHashSet("A", "B"), newHashSet("C")));
-        fds.add(new FD(newHashSet("C"), newHashSet("B")));
-        fds.add(new FD(newHashSet("C"), newHashSet("D")));
+        fds.add(new FD(newAttributeSet("A", "B"), newAttributeSet("C")));
+        fds.add(new FD(newAttributeSet("C"), newAttributeSet("B")));
+        fds.add(new FD(newAttributeSet("C"), newAttributeSet("D")));
 
 
-        Set<Set<String>> result = new HashSet<>();
-        result.add(newHashSet("A", "B"));
-        result.add(newHashSet("A", "C"));
+        Set<Set<Attribute>> result = new HashSet<>();
+        result.add(newAttributeSet("A", "B"));
+        result.add(newAttributeSet("A", "C"));
 
-        assertEquals(result, findCandidateKeys(fds, newHashSet("A", "B", "C", "D")));
+        assertEquals(result, findCandidateKeys(fds, newAttributeSet("A", "B", "C", "D")));
 
     }
 
     @Test
     public void findCandidateKeysTest3() {
         Set<FD> fds = new HashSet<>();
-        fds.add(new FD(newHashSet("A"), newHashSet("B")));
-        fds.add(new FD(newHashSet("B"), newHashSet("C")));
-        fds.add(new FD(newHashSet("C"), newHashSet("A")));
+        fds.add(new FD(newAttributeSet("A"), newAttributeSet("B")));
+        fds.add(new FD(newAttributeSet("B"), newAttributeSet("C")));
+        fds.add(new FD(newAttributeSet("C"), newAttributeSet("A")));
 
 
-        Set<Set<String>> result = new HashSet<>();
-        result.add(newHashSet("A"));
-        result.add(newHashSet("B"));
-        result.add(newHashSet("C"));
+        Set<Set<Attribute>> result = new HashSet<>();
+        result.add(newAttributeSet("A"));
+        result.add(newAttributeSet("B"));
+        result.add(newAttributeSet("C"));
 
-        assertEquals(result, findCandidateKeys(fds, newHashSet("A", "B", "C")));
+        assertEquals(result, findCandidateKeys(fds, newAttributeSet("A", "B", "C")));
 
     }
 
@@ -231,39 +239,39 @@ public class FDTest {
     public void findCandidateKeysNoFDTest3() {
         Set<FD> fds = new HashSet<>();
 
-        Set<Set<String>> result = new HashSet<>();
-        result.add(newHashSet("A", "B", "C"));
+        Set<Set<Attribute>> result = new HashSet<>();
+        result.add(newAttributeSet("A", "B", "C"));
 
-        assertEquals(result, findCandidateKeys(fds, newHashSet("A", "B", "C")));
+        assertEquals(result, findCandidateKeys(fds, newAttributeSet("A", "B", "C")));
 
     }
 
     @Test
     public void attributeClosureTest() {
         Set<FD> fds = new HashSet<>();
-        FD fd1 = new FD(newHashSet("A", "B"), newHashSet("C"));
-        FD fd2 = new FD(newHashSet("C"), newHashSet("B"));
-        FD fd3 = new FD(newHashSet("C"), newHashSet("D"));
-        FD fd4 = new FD(newHashSet("N"), newHashSet("N"));
+        FD fd1 = new FD(newAttributeSet("A", "B"), newAttributeSet("C"));
+        FD fd2 = new FD(newAttributeSet("C"), newAttributeSet("B"));
+        FD fd3 = new FD(newAttributeSet("C"), newAttributeSet("D"));
+        FD fd4 = new FD(newAttributeSet("N"), newAttributeSet("N"));
         fds.add(fd1);
         fds.add(fd2);
         fds.add(fd3);
         fds.add(fd4);
 
-        assertEquals(newHashSet("A", "B", "C", "D"), attributeClosure(fd1.getLhs(), fds));
-        assertEquals(newHashSet("C", "B", "D"), attributeClosure(fd2.getLhs(), fds));
-        assertEquals(newHashSet("C", "B", "D"), attributeClosure(fd3.getLhs(), fds));
-        assertEquals(newHashSet("N"), attributeClosure(fd4.getLhs(), fds));
+        assertEquals(newAttributeSet("A", "B", "C", "D"), attributeClosure(fd1.getLhs(), fds));
+        assertEquals(newAttributeSet("C", "B", "D"), attributeClosure(fd2.getLhs(), fds));
+        assertEquals(newAttributeSet("C", "B", "D"), attributeClosure(fd3.getLhs(), fds));
+        assertEquals(newAttributeSet("N"), attributeClosure(fd4.getLhs(), fds));
 
     }
 
     @Test
     public void removeFDTest() {
         Set<FD> fds = new HashSet<>();
-        FD fd1 = new FD(newHashSet("A", "B"), newHashSet("C"));
-        FD fd2 = new FD(newHashSet("C"), newHashSet("B"));
-        FD fd3 = new FD(newHashSet("C"), newHashSet("D"));
-        FD fd4 = new FD(newHashSet("N"), newHashSet("N"));
+        FD fd1 = new FD(newAttributeSet("A", "B"), newAttributeSet("C"));
+        FD fd2 = new FD(newAttributeSet("C"), newAttributeSet("B"));
+        FD fd3 = new FD(newAttributeSet("C"), newAttributeSet("D"));
+        FD fd4 = new FD(newAttributeSet("N"), newAttributeSet("N"));
         fds.add(fd1);
         fds.add(fd2);
         fds.add(fd3);
@@ -277,7 +285,7 @@ public class FDTest {
         assertAll("removeFD",
                 () -> assertEquals(result1, removeFD(fds, fd4)),
                 () -> assertEquals(result2, removeFD(fds, fd1)),
-                () -> assertEquals(result3, removeFD(fds, new FD(newHashSet("C"), newHashSet("A"))))
+                () -> assertEquals(result3, removeFD(fds, new FD(newAttributeSet("C"), newAttributeSet("A"))))
         );
     }
 
