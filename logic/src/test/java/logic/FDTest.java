@@ -1,6 +1,7 @@
 package logic;
 
 
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -8,7 +9,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Sets.difference;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.powerSet;
 import static logic.Relations.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -236,7 +239,7 @@ public class FDTest {
     }
 
     @Test
-    public void findCandidateKeysNoFDTest3() {
+    public void findCandidateKeysNoFDTest4() {
         Set<FD> fds = new HashSet<>();
 
         Set<Set<Attribute>> result = new HashSet<>();
@@ -244,6 +247,20 @@ public class FDTest {
 
         assertEquals(result, findCandidateKeys(fds, newAttributeSet("A", "B", "C")));
 
+    }
+
+    @Test
+    public void findCandidateKeysTest5(){
+        Set<FD> fds = newHashSet(
+                new FD(newAttributeSet("Tournament", "Year"), newAttributeSet("Winner", "A")),
+                new FD(newAttributeSet("Winner","A"), newAttributeSet("Date of Birth"))
+        );
+
+        Set<Set<Attribute>> result = new HashSet<>();
+        result.add(newAttributeSet("Tournament", "Year"));
+
+        Set<Attribute> attributes = newAttributeSet("Tournament", "Year", "Winner", "A", "Date of Birth");
+        assertEquals(result, findCandidateKeys(fds, attributes));
     }
 
     @Test

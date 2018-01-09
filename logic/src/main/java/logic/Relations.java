@@ -164,6 +164,12 @@ public class Relations {
         Set<Attribute> middle = Sets.intersection(left, right);
         left = Sets.difference(left, middle);
 
+        Set<Attribute> attributeClosure = attributeClosure(left, fds);
+        if (attributeClosure.containsAll(attributes)) {
+            candKeys.add(left);
+            return candKeys;
+        }
+
         Set<Set<Attribute>> powerSet = powerSet(middle);
         boolean keyFound = false;
         int keySize = 0;
