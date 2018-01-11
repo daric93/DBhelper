@@ -1,5 +1,6 @@
 package logic;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -13,10 +14,12 @@ public class Table {
 
     Table(Attribute... attributes) {
         this.attributes = newHashSet(attributes);
+        this.foreignKeys = new HashMap<>();
     }
 
     Table(Set<Attribute> attributes) {
         this.attributes = attributes;
+        this.foreignKeys = new HashMap<>();
     }
 
     public Set<Attribute> getAttributes() {

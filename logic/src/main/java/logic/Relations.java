@@ -5,7 +5,7 @@ import com.google.common.collect.Sets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Sets.powerSet;
+import static com.google.common.collect.Sets.newHashSet;
 
 public class Relations {
 
@@ -18,26 +18,99 @@ public class Relations {
     }
 
     static Set<Table> secondNF(Set<FD> funcDep) {
-        return null;
+        Set<Table> secondNF = new HashSet<>();
+        Set<Attribute> attributes = getAllAttr(funcDep);
+        Set<FD> canonicalCover = canonicalCover(funcDep);
+        Set<Set<Attribute>> candidateKeys = findCandidateKeys(canonicalCover, attributes);
+
+        Map<Set<Attribute>, Table> foreignKeys = new HashMap<>();
+
+        //TODO: check that only proper subsets and sorted in increasing order
+        Set<Set<Attribute>> properSubsets = candidateKeys.stream()
+                .map(ckey -> {
+                    Set<Set<Attribute>> powerSet = powerSet(ckey);
+                    powerSet.remove(ckey);
+                    return powerSet;
+                })
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+        for (Set<Attribute> subset : properSubsets) {
+            Set<Attribute> closure = attributeClosure(subset, funcDep);
+            if (closure.size() > subset.size()) {
+                attributes.removeAll(closure);
+                attributes.addAll(subset);
+                Table newTable = new Table(closure);
+                secondNF.add(newTable);
+                //TODO : set primary key
+                newTable.setPrimaryKey(subset);
+                //TODO set foreign key
+                foreignKeys.put(subset, newTable);
+            }
+        }
+        Table table = new Table(attributes);
+        //TODO : set primary key
+        Set<FD> fdSet = funcDepPerTable(table, canonicalCover);
+        table.setPrimaryKey(findCandidateKeys(fdSet, attributes).iterator().next());
+        //TODO set foreign key
+        table.setForeignKeys(foreignKeys);
+        secondNF.add(table);
+        return secondNF;
     }
 
-
     public static Decomposition thirdNF(Set<FD> funcDep) {
-        Set<Table> tables = new HashSet<>();
-        Set<Set<Attribute>> candidateKeys = findCandidateKeys(funcDep, getAllAttr(funcDep));
-        Set<FD> canonicalCover = canonicalCover(funcDep);
+        Set<Table> thirdNF = new HashSet<>();
+        Set<Table> secondNF = secondNF(funcDep);
+        Set<FD> cover = canonicalCover(funcDep);
 
-        Set<FD> fdSet = combineRHS(canonicalCover);
-        boolean containsCandidateKey = false;
-        for (FD fd : fdSet) {
-            Table table = new Table(Sets.union(fd.getRhs(), fd.getLhs()));
-            tables.add(table);
-            if (!containsCandidateKey)
-                containsCandidateKey = candidateKeys.stream().anyMatch(table.getAttributes()::containsAll);
+        for (Table table : secondNF) {
+            getthirdNF(table, cover, thirdNF);
         }
-        if (!containsCandidateKey)
-            tables.add(new Table(candidateKeys.iterator().next()));
-        return new Decomposition(tables,canonicalCover);
+        new Decomposition(thirdNF, cover);
+        return new Decomposition(thirdNF, cover);
+    }
+
+    static void getthirdNF(Table table, Set<FD> cover, Set<Table> thirdNF) {
+        Set<Attribute> attributes = table.getAttributes();
+        Set<FD> fdSet = funcDepPerTable(table, cover);
+        Set<Set<Attribute>> candidateKeys = findCandidateKeys(fdSet, attributes);
+
+        Set<Attribute> primeAttributes = candidateKeys.stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+        Set<Attribute> nonPrimeAttributes = Sets.difference(attributes, primeAttributes);
+
+
+        for (Attribute attribute : nonPrimeAttributes) {
+            Set<Attribute> leftSide = getLeftSide(attribute, fdSet);
+            if (!primeAttributes.containsAll(leftSide)) {
+                Set<Attribute> closure = attributeClosure(leftSide, fdSet);
+
+                attributes.removeAll(closure);
+                attributes.addAll(leftSide);
+
+                Table newTable = new Table(closure);
+                newTable.setPrimaryKey(leftSide);
+
+                Table oldTable = new Table(attributes);
+                oldTable.setPrimaryKey(table.getPrimaryKey());
+                Map<Set<Attribute>, Table> foreignKeys = table.getForeignKeys();
+                foreignKeys.put(leftSide, newTable);
+                oldTable.setForeignKeys(foreignKeys);
+
+                getthirdNF(newTable, cover, thirdNF);
+                getthirdNF(oldTable, cover, thirdNF);
+                return;
+            }
+        }
+        thirdNF.add(table);
+    }
+
+    private static Set<Attribute> getLeftSide(Attribute attribute, Set<FD> fdSet) {
+        for (FD fd : fdSet) {
+            if (fd.getRhs().contains(attribute))
+                return fd.getLhs();
+        }
+        throw new RuntimeException("Invalid canonical cover");
     }
 
     public static Decomposition bcNF(Set<FD> funcDep) {
@@ -48,6 +121,8 @@ public class Relations {
         for (Table table : thirdNFDecomposition.getTables()) {
             bcNF(table, bcNFDecomp, canonicalCover);
         }
+        bcNFDecomp.forEach(table -> setPrimaryKey(table, canonicalCover));
+
         return new Decomposition(bcNFDecomp, canonicalCover);
     }
 
@@ -138,7 +213,7 @@ public class Relations {
         Set<FD> fds = new HashSet<>();
         for (FD fd : funcDependencies)
             for (Attribute attr : fd.getRhs())
-                fds.add(new FD(fd.getLhs(), Sets.newHashSet(attr)));
+                fds.add(new FD(fd.getLhs(), newHashSet(attr)));
         return fds;
     }
 
@@ -206,5 +281,32 @@ public class Relations {
             funcDep.add(new FD(k, set));
         });
         return funcDep;
+    }
+
+    //TODO: set primary key during creation
+    static void setPrimaryKey(Table table, Set<FD> cover) {
+        Set<FD> tableDep = funcDepPerTable(table, cover);
+        Set<Set<Attribute>> keys = findCandidateKeys(tableDep, table.getAttributes());
+        table.setPrimaryKey(keys.iterator().next());
+    }
+
+    //TODO: check that this work (with dep t -> t and without)
+    static <T> Set<Set<T>> powerSet(Set<T> originalSet) {
+        Set<Set<T>> sets = new HashSet<>();
+        if (originalSet.isEmpty()) {
+            sets.add(new HashSet<>());
+            return sets;
+        }
+        List<T> list = new ArrayList<>(originalSet);
+        T head = list.get(0);
+        Set<T> rest = new HashSet<>(list.subList(1, list.size()));
+        for (Set<T> set : powerSet(rest)) {
+            Set<T> newSet = new HashSet<>();
+            newSet.add(head);
+            newSet.addAll(set);
+            sets.add(newSet);
+            sets.add(set);
+        }
+        return sets;
     }
 }

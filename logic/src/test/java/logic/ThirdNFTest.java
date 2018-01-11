@@ -21,6 +21,7 @@ public class ThirdNFTest {
         );
 
         assertEquals(expected, thirdNF(fds).getTables());
+
     }
 
     @Test
@@ -32,6 +33,21 @@ public class ThirdNFTest {
         Set<Table> expected = newHashSet(
                 new Table(newAttributeSet("Tournament", "Year", "Winner")),
                 new Table(newAttributeSet("Winner", "Date of Birth"))
+        );
+
+        assertEquals(expected, thirdNF(fds).getTables());
+
+    }
+
+    @Test
+    public void oneTransitiveDep2Test() {
+        Set<FD> fds = newHashSet(
+                new FD(newAttributeSet("Tournament", "Year"), newAttributeSet("Winner", "A")),
+                new FD(newAttributeSet("Winner", "A"), newAttributeSet("Date of Birth"))
+        );
+        Set<Table> expected = newHashSet(
+                new Table(newAttributeSet("Tournament", "Year", "Winner", "A")),
+                new Table(newAttributeSet("Winner", "A", "Date of Birth"))
         );
 
         assertEquals(expected, thirdNF(fds).getTables());
