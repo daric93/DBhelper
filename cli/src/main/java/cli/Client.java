@@ -1,20 +1,17 @@
 package cli;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import logic.Decomposition;
-import logic.FD;
-import logic.Relations;
-import logic.Table;
+import app.SQLGen;
+import logic.*;
 import org.apache.commons.cli.*;
+import org.apache.commons.lang3.tuple.Pair;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.ObjectNode;
 
 import java.io.*;
-import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Client {
     private static void initOptions(Options options) {
@@ -24,45 +21,93 @@ public class Client {
         options.addOption("t", "thirdNF", false, "compute third normal form");
         options.addOption("b", "bcNF", false, "compute Boyce-Codd normal form");
         options.addOption("h", "help", false, "print help");
+        options.addOption("s", "script", false, "generate script");
+
     }
 
-    static Set<FD> readFile(File file) throws IOException {
-        Set<FD> fds = new HashSet<>();
-        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = in.readLine()) != null) {
-                String[] strings = line.split("-");
-                String[] left = strings[0].trim().split("\\s*,\\s*");
-                String[] right = strings[1].trim().split("\\s*,\\s*");
-                fds.add(new FD(newHashSet(left), newHashSet(right)));
+    static InputData readFile(File file) throws IOException {
+        Map<String, String> attrs = new HashMap<>();
+        List<Pair<List<String>, List<String>>> dep = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            JsonNode root = mapper.readTree(reader);
+            JsonNode attributes = root.path("attributes");
+            for (JsonNode node : attributes) {
+                attrs.put(
+                        node.path("name").getTextValue(),
+                        node.path("type").getTextValue());
+            }
+
+            for (JsonNode node : root.path("funcDep")) {
+                List<String> left = new ArrayList<>();
+                for (JsonNode jsonNode : node.path("left")) {
+                    left.add(jsonNode.getTextValue());
+                }
+
+                List<String> right = new ArrayList<>();
+                for (JsonNode jsonNode : node.path("right")) {
+                    right.add(jsonNode.getTextValue());
+                }
+
+                dep.add(Pair.of(left, right));
             }
         }
-        return fds;
+
+        return new InputData(
+                attrs.entrySet().stream()
+                        .map(e -> new Attribute(e.getKey(), e.getValue()))
+                        .collect(Collectors.toSet()),
+                dep.stream().map(pair -> new FD(
+                        pair.getLeft().stream()
+                                .map(str -> new Attribute(str, attrs.get(str)))
+                                .collect(Collectors.toSet()),
+                        pair.getRight().stream()
+                                .map(str -> new Attribute(str, attrs.get(str)))
+                                .collect(Collectors.toSet())
+                )).collect(Collectors.toSet())
+        );
     }
 
-    @SuppressWarnings("unchecked")
-    static void writeFile(File file, Set<FD> fds) throws IOException {
-        Type type = new TypeToken<Set<FD>>() {
-        }.getType();
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(gson.toJson(fds, type));
-            writer.flush();
-        }
-    }
     static void writeFile(File file, Decomposition fds) throws IOException {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode root = mapper.createArrayNode();
 
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(gson.toJson(fds, Decomposition.class));
-            writer.flush();
+        for (Table table : fds.getTables()) {
+            ObjectNode tableObj = mapper.createObjectNode();
+            tableObj.put("name", table.hashCode());
+
+            ArrayNode attributesObj = mapper.createArrayNode();
+            for (Attribute attribute : table.getAttributes()) {
+                ObjectNode attrObj = mapper.createObjectNode();
+                attrObj.put("name", attribute.getName());
+                attrObj.put("type", attribute.getType());
+                attributesObj.add(attrObj);
+            }
+            tableObj.put("attributes", attributesObj);
+
+            ArrayNode primaryKeyObj = mapper.createArrayNode();
+            for (Attribute attribute : table.getPrimaryKey()) {
+                primaryKeyObj.add(attribute.getName());
+            }
+            tableObj.put("primary key", primaryKeyObj);
+
+            ArrayNode fksArray = mapper.createArrayNode();
+            for (Map.Entry<Set<Attribute>, Table> fk : table.getForeignKeys().entrySet()) {
+                ObjectNode fkObj = mapper.createObjectNode();
+                ArrayNode attrArray = mapper.createArrayNode();
+                fk.getKey().forEach(a -> attrArray.add(a.getName()));
+
+                fkObj.put("key", attrArray);
+                fkObj.put("references", fk.getValue().hashCode());
+                fksArray.add(fkObj);
+            }
+
+            tableObj.put("foreign keys", fksArray);
+            root.add(tableObj);
         }
-    }
 
-    static void parseInput(String input) {
-
-
+        mapper.defaultPrettyPrintingWriter().writeValue(file, root);
     }
 
     public static void main(String[] args) throws IOException {
@@ -90,15 +135,18 @@ public class Client {
                 throw new MissingArgumentException("Missed output file");
             }
 
-            if (cmd.hasOption("c")) {
-                Set<FD> fdSet = readFile(new File(inFile));
-                Set<FD> canonicalCover = Relations.canonicalCover(fdSet);
-                writeFile(new File(outFile), canonicalCover);
-            }
             if (cmd.hasOption("t")) {
-                Set<FD> fdSet = readFile(new File(inFile));
-                Decomposition thirdNF = Relations.thirdNF(fdSet);
+                InputData data = readFile(new File(inFile));
+                Decomposition thirdNF = Relations.thirdNF(data.getFuncDep());
                 writeFile(new File(outFile), thirdNF);
+            }
+            if (cmd.hasOption("s")) {
+                InputData data = readFile(new File(inFile));
+                Decomposition thirdNF = Relations.thirdNF(data.getFuncDep());
+                String script = SQLGen.createScript(thirdNF);
+                try (FileWriter writer = new FileWriter(new File(outFile))) {
+                    writer.write(script);
+                }
             }
         } catch (ParseException e) {
             System.err.println("Parsing failed.  Reason: " + e.getMessage());
